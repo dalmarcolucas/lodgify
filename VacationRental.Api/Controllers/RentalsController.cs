@@ -35,7 +35,7 @@ namespace VacationRental.Api.Controllers
             {
                 Id = key.Id,
                 Units = model.Units,
-                PreparationTime = model.PreparationTime
+                PreparationTimeInDays = model.PreparationTimeInDays
             });
 
             return key;
