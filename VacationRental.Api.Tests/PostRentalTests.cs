@@ -22,7 +22,8 @@ namespace VacationRental.Api.Tests
         {
             var request = new RentalBindingModel
             {
-                Units = 25
+                Units = 25,
+                PreparationTime = 3
             };
 
             ResourceIdViewModel postResult;
@@ -38,6 +39,7 @@ namespace VacationRental.Api.Tests
 
                 var getResult = await getResponse.Content.ReadAsAsync<RentalViewModel>();
                 Assert.Equal(request.Units, getResult.Units);
+                Assert.Equal(request.PreparationTime, getResult.PreparationTime);
             }
         }
     }
