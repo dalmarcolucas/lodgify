@@ -54,7 +54,6 @@ namespace VacationRental.Api.Tests
                 Assert.Equal(postBookingRequest.RentalId, getBookingResult.RentalId);
                 Assert.Equal(postBookingRequest.Nights, getBookingResult.Nights);
                 Assert.Equal(postBookingRequest.Start, getBookingResult.Start);
-                Assert.Equal(1, getBookingResult.Unit);
             }
         }
 

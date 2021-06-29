@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using VacationRental.Api.Models;
 
@@ -33,28 +34,7 @@ namespace VacationRental.Api.Controllers
         [HttpPost]
         public ResourceIdViewModel Post(BookingBindingModel model)
         {
-            if (model.Nights <= 0)
-                throw new ApplicationException("Nigts must be positive");
-            if (!_rentals.ContainsKey(model.RentalId))
-                throw new ApplicationException("Rental not found");
-
-            for (var i = 0; i < model.Nights; i++)
-            {
-                var count = 0;
-                foreach (var booking in _bookings.Values)
-                {
-                    if (booking.RentalId == model.RentalId
-                        && (booking.Start <= model.Start.Date && booking.Start.AddDays(booking.Nights) > model.Start.Date)
-                        || (booking.Start < model.Start.AddDays(model.Nights) && booking.Start.AddDays(booking.Nights) >= model.Start.AddDays(model.Nights))
-                        || (booking.Start > model.Start && booking.Start.AddDays(booking.Nights) < model.Start.AddDays(model.Nights)))
-                    {
-                        count++;
-                    }
-                }
-                if (count >= _rentals[model.RentalId].Units)
-                    throw new ApplicationException("Not available");
-            }
-
+            ValidateBooking(model);
 
             var key = new ResourceIdViewModel { Id = _bookings.Keys.Count + 1 };
 
@@ -64,9 +44,41 @@ namespace VacationRental.Api.Controllers
                 Nights = model.Nights,
                 RentalId = model.RentalId,
                 Start = model.Start.Date,
+                Unit = GetOccupiedUnits(model.Start.Date, model.Nights) + 1
             });
 
             return key;
         }
+
+        private void ValidateBooking(BookingBindingModel model)
+        {
+            if (model.Nights <= 0)
+                throw new ApplicationException("Nigts must be positive");
+
+            if (!_rentals.ContainsKey(model.RentalId))
+                throw new ApplicationException("Rental not found");
+
+            if (GetOccupiedUnits(model.Start.Date, model.Nights) >= _rentals[model.RentalId].Units)
+                throw new ApplicationException("Not available");
+        }
+
+        private int GetOccupiedUnits(DateTime start, int nights)
+        {
+            var occupiedUnits = 0;
+            for (var i = 0; i < nights; i++)
+                occupiedUnits = Math.Max(occupiedUnits, _bookings.Count(booking => OverlapBooking(start, nights, booking.Value)));
+
+            return occupiedUnits;
+        }
+
+        private bool OverlapBooking(in DateTime start, int nights, BookingViewModel booking)
+        {
+            var conflict = booking.Start <= start.Date && booking.End > start.Date
+                            || booking.Start < start.AddDays(nights) && booking.End >= start.AddDays(nights)
+                            || booking.Start > start && booking.End < start.AddDays(nights);
+
+            return conflict;
+        }
+
     }
 }
