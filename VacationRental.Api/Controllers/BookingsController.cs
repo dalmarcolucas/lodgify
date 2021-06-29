@@ -44,7 +44,8 @@ namespace VacationRental.Api.Controllers
                 Nights = model.Nights,
                 RentalId = model.RentalId,
                 Start = model.Start.Date,
-                Unit = GetOccupiedUnits(model.Start.Date, model.Nights) + 1
+                Unit = GetOccupiedUnits(model.Start.Date, model.Nights, model.RentalId) + 1,
+                PreparationDays = _rentals[model.RentalId].PreparationTimeInDays
             });
 
             return key;
@@ -58,15 +59,15 @@ namespace VacationRental.Api.Controllers
             if (!_rentals.ContainsKey(model.RentalId))
                 throw new ApplicationException("Rental not found");
 
-            if (GetOccupiedUnits(model.Start.Date, model.Nights) >= _rentals[model.RentalId].Units)
+            if (GetOccupiedUnits(model.Start.Date, model.Nights, model.RentalId) >= _rentals[model.RentalId].Units)
                 throw new ApplicationException("Not available");
         }
 
-        private int GetOccupiedUnits(DateTime start, int nights)
+        private int GetOccupiedUnits(DateTime start, int nights, int idRental)
         {
             var occupiedUnits = 0;
             for (var i = 0; i < nights; i++)
-                occupiedUnits = Math.Max(occupiedUnits, _bookings.Count(booking => OverlapBooking(start, nights, booking.Value)));
+                occupiedUnits = Math.Max(occupiedUnits, _bookings.Count(booking => idRental == booking.Value.RentalId && OverlapBooking(start, nights, booking.Value)));
 
             return occupiedUnits;
         }
