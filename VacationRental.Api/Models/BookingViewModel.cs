@@ -2,7 +2,7 @@
 
 namespace VacationRental.Api.Models
 {
-    public class BookingViewModel
+    public class BookingViewModel : ICloneable
     {
         public int Id { get; set; }
         public int RentalId { get; set; }
@@ -12,5 +12,23 @@ namespace VacationRental.Api.Models
         public int PreparationDays { get; set; }
         public DateTime End { get { return Start.AddDays(Nights); } }
         public DateTime EndWithPreparation { get { return Start.AddDays(Nights + PreparationDays); } }
+
+        public BookingViewModel Clone()
+        {
+            return new BookingViewModel
+            {
+                Id = this.Id,
+                RentalId = this.RentalId,
+                Start = this.Start,
+                Nights = this.Nights,
+                Unit = this.Unit,
+                PreparationDays = this.PreparationDays,
+            };
+        }
+
+        object ICloneable.Clone()
+        {
+            return this.Clone();
+        }
     }
 }
