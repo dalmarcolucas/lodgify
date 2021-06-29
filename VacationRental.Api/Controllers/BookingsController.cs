@@ -74,9 +74,9 @@ namespace VacationRental.Api.Controllers
 
         private bool OverlapBooking(in DateTime start, int nights, BookingViewModel booking)
         {
-            var conflict = booking.Start <= start.Date && booking.End > start.Date
-                            || booking.Start < start.AddDays(nights) && booking.End >= start.AddDays(nights)
-                            || booking.Start > start && booking.End < start.AddDays(nights);
+            var conflict = booking.Start <= start.Date && booking.EndWithPreparation > start.Date
+                            || booking.Start < start.AddDays(nights) && booking.EndWithPreparation >= start.AddDays(nights)
+                            || booking.Start > start && booking.EndWithPreparation < start.AddDays(nights);
 
             return conflict;
         }
