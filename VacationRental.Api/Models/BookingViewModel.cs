@@ -1,9 +1,25 @@
 ﻿using System;
+using VacationRental.Domain.Rental;
 
 namespace VacationRental.Api.Models
 {
     public class BookingViewModel : ICloneable
     {
+        public BookingViewModel()
+        {
+
+        }
+
+        public BookingViewModel(Booking booking)
+        {
+            Id = booking.Id;
+            RentalId = booking.RentalId;
+            Start = booking.Start;
+            Nights = booking.Nights;
+            Unit = booking.Unit;
+            PreparationDays = booking.PreparationDays;
+        }
+
         public int Id { get; set; }
         public int RentalId { get; set; }
         public DateTime Start { get; set; }
@@ -29,6 +45,19 @@ namespace VacationRental.Api.Models
         object ICloneable.Clone()
         {
             return this.Clone();
+        }
+
+        internal Booking ToBooking()
+        {
+            return new Booking()
+            {
+                Id = this.Id,
+                RentalId = this.RentalId,
+                Start = this.Start,
+                Nights = this.Nights,
+                Unit = this.Unit,
+                PreparationDays = this.PreparationDays,
+            };
         }
     }
 }

@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using VacationRental.Api.Models;
+using VacationRental.Domain.Rental;
 
 namespace VacationRental.Api.Services
 {
     public static class BookingService
     {
-        public static bool OverlapBooking(in DateTime start, int nights, BookingViewModel booking)
+        public static bool OverlapBooking(in DateTime start, int nights, Booking booking)
         {
             var conflict = booking.Start <= start.Date && booking.EndWithPreparation > start.Date
                             || booking.Start < start.AddDays(nights) && booking.EndWithPreparation >= start.AddDays(nights)
@@ -16,13 +17,13 @@ namespace VacationRental.Api.Services
             return conflict;
         }
 
-        public static int GetOccupiedUnits(IDictionary<int, BookingViewModel> bookings, DateTime start, int nights, int idRental, int idBooking = 0)
+        public static int GetOccupiedUnits(IEnumerable<Booking> bookings, DateTime start, int nights, int idRental, int idBooking = 0)
         {
             var occupiedUnits = 0;
             for (var i = 0; i < nights; i++)
-                occupiedUnits = Math.Max(occupiedUnits, bookings.Count(booking => idRental == booking.Value.RentalId
-                   && booking.Value.Id != idBooking
-                   && OverlapBooking(start, nights, booking.Value)));
+                occupiedUnits = Math.Max(occupiedUnits, bookings.Count(booking => idRental == booking.RentalId
+                   && booking.Id != idBooking
+                   && OverlapBooking(start, nights, booking)));
 
             return occupiedUnits;
         }
