@@ -1,4 +1,5 @@
 ﻿using System;
+using VacationRental.Domain.Rental;
 
 namespace VacationRental.Api.Models
 {
@@ -14,5 +15,15 @@ namespace VacationRental.Api.Models
 
         private DateTime _startIgnoreTime;
         public int Nights { get; set; }
+
+        internal Booking ToBooking()
+        {
+            return new Booking
+            {
+                RentalId = this.RentalId,
+                Start = this.Start,
+                Nights = this.Nights,
+            };
+        }
     }
 }

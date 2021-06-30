@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using VacationRental.Api.Models;
+using VacationRental.Api.Services;
+using VacationRental.Infrastructure.Repositories;
 
 namespace VacationRental.Api.Controllers
 {
@@ -9,35 +11,44 @@ namespace VacationRental.Api.Controllers
     [ApiController]
     public class RentalsController : ControllerBase
     {
-        private readonly IDictionary<int, RentalViewModel> _rentals;
+        private IRentalRepository _rentalRepository;
+        private RentalService _rentalService;
 
-        public RentalsController(IDictionary<int, RentalViewModel> rentals)
+
+        private RentalService RentalService
         {
-            _rentals = rentals;
+            get { return _rentalService ?? (_rentalService = new RentalService(_rentalRepository)); }
+        }
+
+        public RentalsController(IRentalRepository rentalRepository)
+        {
+            _rentalRepository = rentalRepository;
         }
 
         [HttpGet]
         [Route("{rentalId:int}")]
         public RentalViewModel Get(int rentalId)
         {
-            if (!_rentals.ContainsKey(rentalId))
-                throw new ApplicationException("Rental not found");
-
-            return _rentals[rentalId];
+           return new RentalViewModel(_rentalRepository.GetRental(rentalId));
         }
 
         [HttpPost]
         public ResourceIdViewModel Post(RentalBindingModel model)
         {
-            var key = new ResourceIdViewModel { Id = _rentals.Keys.Count + 1 };
-
-            _rentals.Add(key.Id, new RentalViewModel
+            return new ResourceIdViewModel()
             {
-                Id = key.Id,
-                Units = model.Units
-            });
-
-            return key;
+                Id = _rentalRepository.AddRental(model.ToRental()).Id
+            };
         }
+
+        [HttpPut]
+        [Route("{rentalId:int}")]
+        public RentalViewModel Put(int rentalId, RentalBindingModel model)
+        {
+            RentalService.UpdateRental(rentalId, model);
+
+            return new RentalViewModel(_rentalRepository.GetRental(rentalId));
+        }
+
     }
 }
